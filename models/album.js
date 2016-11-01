@@ -4,7 +4,6 @@ var track = require('./track');
 
 var album = {
   title: String,
-  author_id: mongoose.Schema.Types.ObjectId,
   released: Date,
   length: String,
   genres: [String],
@@ -20,9 +19,6 @@ var albumType = new graphql.GraphQLObjectType({
       },
       title: {
         type: graphql.GraphQLString
-      },
-      author_id: {
-        type: graphql.GraphQLID
       },
       released: {
         type: graphql.GraphQLString
@@ -40,8 +36,7 @@ var albumType = new graphql.GraphQLObjectType({
   }
 });
 
-
 module.exports = {
   schema: album,
-  type: albumType
+  type: albumType,
 };

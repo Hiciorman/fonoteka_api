@@ -6,5 +6,6 @@ var root = require('./models/author.js');
 
 
 module.exports = new graphql.GraphQLSchema({
-    query: root
+    query: root.query,
+    mutation: root.mutation
 });
