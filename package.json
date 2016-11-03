@@ -1,8 +1,6 @@
 {
   "name": "fonoteka",
   "version": "1.0.0",
-  "description": "music application",
-  "main": "server.js",
   "dependencies": {
     "bluebird": "^3.4.6",
     "express": "^4.14.0",
@@ -15,6 +13,6 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node server.js"
   },
-  "author": "szymon",
-  "license": "ISC"
+  "author": "szymon gwozdz",
+  "private": true
 }
