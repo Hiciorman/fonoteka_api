@@ -1,12 +1,12 @@
 {
-  "name": "fonoteka",
+  "name": "fonoteka_webapi",
   "version": "1.0.0",
   "dependencies": {
     "bluebird": "^3.4.6",
     "express": "^4.14.0",
     "express-graphql": "^0.5.4",
     "graphql": "^0.7.2",
-    "mongoose": "^4.6.5"
+    "mongoose": "^4.6.6"
   },
   "devDependencies": {},
   "scripts": {
