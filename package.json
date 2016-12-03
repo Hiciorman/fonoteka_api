@@ -1,6 +1,7 @@
 {
   "name": "fonoteka_webapi",
   "version": "1.0.0",
+  "description": "web api",
   "dependencies": {
     "bluebird": "^3.4.6",
     "express": "^4.14.0",
