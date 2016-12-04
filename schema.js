@@ -3,20 +3,31 @@ var mongoose = require('mongoose');
 mongoose.connect('mongodb://localhost/fonoteka');
 mongoose.Promise = require('bluebird');
 
-var person = require('./models/person');
+var user = require('./models/user')
+var artist = require('./models/artist');
 var album = require('./models/album');
-
 
 var query = new graphql.GraphQLObjectType({
     name: 'query',
     fields: () => ({
-        people: {
-            type: new graphql.GraphQLList(person.type),
+        users: {
+            type: new graphql.GraphQLList(user.type),
             resolve: () => {
                 return new Promise((resolve, reject) => {
-                    person.schema.find((err, people) => {
+                    user.model.find((err, artists) => {
                         if (err) reject(err)
-                        else resolve(people)
+                        else resolve(artists)
+                    })
+                })
+            }
+        },
+        artists: {
+            type: new graphql.GraphQLList(artist.type),
+            resolve: () => {
+                return new Promise((resolve, reject) => {
+                    artist.model.find((err, artists) => {
+                        if (err) reject(err)
+                        else resolve(artists)
                     })
                 })
             }
@@ -25,7 +36,7 @@ var query = new graphql.GraphQLObjectType({
             type: new graphql.GraphQLList(album.type),
             resolve: () => {
                 return new Promise((resolve, reject) => {
-                    album.schema.find((err, albums) => {
+                    album.model.find((err, albums) => {
                         if (err) reject(err)
                         else resolve(albums)
                     })
@@ -38,7 +49,7 @@ var query = new graphql.GraphQLObjectType({
 var mutationType = new graphql.GraphQLObjectType({
     name: 'Mutation',
     fields: {
-        personAdd: person.add,
+        artistAdd: artist.add,
         albumAdd: album.add
     }
 });

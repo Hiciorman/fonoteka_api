@@ -2,7 +2,7 @@ var graphql = require('graphql');
 var mongoose = require('mongoose');
 mongoose.Promise = require('bluebird');
 
-var person = mongoose.model('person', {
+var artistSchema = mongoose.Schema({
     name: {
         first: String,
         last: String
@@ -13,8 +13,8 @@ var person = mongoose.model('person', {
     albums: [mongoose.Schema.Types.ObjectId]
 })
 
-var personType = new graphql.GraphQLObjectType({
-    name: 'Person',
+var artistType = new graphql.GraphQLObjectType({
+    name: 'Artist',
     fields: {
         _id: {
             type: graphql.GraphQLID
@@ -46,9 +46,9 @@ var personType = new graphql.GraphQLObjectType({
     }
 })
 
-var personAdd = {
-    type: personType,
-    description: 'Add person',
+var artistAdd = {
+    type: artistType,
+    description: 'Add artist',
     args: {
         first: {
             name: 'first',
@@ -76,7 +76,7 @@ var personAdd = {
         }
     },
     resolve: (root, args) => {
-        var newPerson = new person({
+        var newArtist = new artist({
             name: {
                 first: args.first,
                 last: args.last,
@@ -87,16 +87,16 @@ var personAdd = {
             albums: args.albums
         })
         return new Promise((resolve, reject) => {
-            newPerson.save(function (err) {
+            newArtist.save(function (err) {
                 if (err) reject(err)
-                else resolve(newPerson)
+                else resolve(newArtist)
             })
         })
     }
 }
 
 module.exports = {
-    schema: person,
-    type: personType,
-    add: personAdd
+    model: mongoose.model('artist', artistSchema),
+    type: artistType,
+    add: artistAdd
 }
