@@ -10,14 +10,27 @@ var album = require('./models/album');
 var query = new graphql.GraphQLObjectType({
     name: 'query',
     fields: () => ({
-        getAllUsers: {
+        users: {
             type: new graphql.GraphQLList(user.type),
-            resolve: () => {
+            args: {
+                first: {
+                    name: 'first',
+                    type: graphql.GraphQLInt
+                }
+            },
+            resolve: (root, args) => {
                 return new Promise((resolve, reject) => {
-                    user.model.find((err, getAllUsers) => {
-                        if (err) reject(err)
-                        else resolve(getAllUsers)
-                    })
+                    var result = user
+                        .model
+                        .find((err, users) => {
+                            if (err) 
+                                reject(err)
+                            else 
+                                resolve(users)
+                        });
+                    if (args.first != null) {
+                        result.limit(args.first)
+                    }
                 })
             }
         },
@@ -27,23 +40,28 @@ var query = new graphql.GraphQLObjectType({
                 name: {
                     name: 'name',
                     type: graphql.GraphQLString
+                },
+                first: {
+                    name: 'first',
+                    type: graphql.GraphQLInt
                 }
             },
             resolve: (root, args) => {
                 return new Promise((resolve, reject) => {
-                    if (args.name == null) {
-                        artist.model.find((err, artists) => {
-                            if (err) reject(err)
-                            else resolve(artists)
-                        })
+                    var result = artist
+                        .model
+                        .find((err, artists) => {
+                            if (err) 
+                                reject(err)
+                            else 
+                                resolve(artists)
+                        });
+                    if (args.name != null) 
+                        result.where('name').equals(args.name);
+                    if (args.first != null) 
+                        result.limit(args.first);
                     }
-                    else {
-                        artist.model.find((err, artists) => {
-                            if (err) reject(err)
-                            else resolve(artists)
-                        }).where('name').equals(args.name)
-                    }
-                })
+                )
             }
         },
         albums: {
@@ -52,27 +70,32 @@ var query = new graphql.GraphQLObjectType({
                 title: {
                     name: 'title',
                     type: graphql.GraphQLString
+                },
+                first: {
+                    name: 'first',
+                    type: graphql.GraphQLInt
                 }
             },
             resolve: (root, args) => {
                 return new Promise((resolve, reject) => {
-                    if (args.title == null) {
-                        album.model.find((err, albums) => {
-                            if (err) reject(err)
-                            else resolve(albums)
-                        })
+                    var result = album
+                        .model
+                        .find((err, albums) => {
+                            if (err) 
+                                reject(err)
+                            else 
+                                resolve(albums)
+                        });
+                    if (args.name != null) 
+                        result.where('name').equals(args.name);
+                    if (args.first != null) 
+                        result.limit(args.first);
                     }
-                    else {
-                        album.model.find((err, albums) => {
-                            if (err) reject(err)
-                            else resolve(albums)
-                        }).where('title').equals(args.title)
-                    }
-                })
+                )
             }
         }
     })
-});
+})
 
 var mutationType = new graphql.GraphQLObjectType({
     name: 'Mutation',
@@ -82,7 +105,4 @@ var mutationType = new graphql.GraphQLObjectType({
     }
 });
 
-module.exports = new graphql.GraphQLSchema({
-    query: query,
-    mutation: mutationType
-});
+module.exports = new graphql.GraphQLSchema({query: query, mutation: mutationType});
