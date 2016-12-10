@@ -4,10 +4,10 @@ mongoose.Promise = require('bluebird');
 var track = require('./track');
 var rating = require('./rating');
 
-var albumSchema = mongoose.Schema({
+var album = mongoose.model('album',{
   title: String,
-  band_id: mongoose.Schema.Types.ObjectId,
   artists: [mongoose.Schema.Types.ObjectId],
+  cover: String,
   released: Date,
   length: String,
   genres: [String],
@@ -21,13 +21,13 @@ var albumType = new graphql.GraphQLObjectType({
     _id: {
       type: graphql.GraphQLID
     },
-    band_id: {
-      type: graphql.GraphQLID
+    title: {
+      type: graphql.GraphQLString
     },
     artists: {
       type: new graphql.GraphQLList(graphql.GraphQLID)
     },
-    title: {
+    cover:{
       type: graphql.GraphQLString
     },
     released: {
@@ -56,13 +56,13 @@ var albumAdd = {
       name: 'title',
       type: new graphql.GraphQLNonNull(graphql.GraphQLString)
     },
-    band_id: {
-      name: 'band_id',
-      type: graphql.GraphQLID
-    },
     artists: {
       name: 'artists',
       type: new graphql.GraphQLList(graphql.GraphQLID)
+    },
+    cover: {
+      name: 'cover',
+      type: graphql.GraphQLString
     },
     released: {
       name: 'released',
@@ -84,8 +84,8 @@ var albumAdd = {
   resolve: (root, args) => {
     var newAlbum = new album({
       title: args.title,
-      band_id: args.band_id,
       artists: args.artists,
+      cover: args.cover,
       released: args.released,
       length: args.length,
       genres: args.genres,
@@ -101,7 +101,7 @@ var albumAdd = {
 }
 
 module.exports = {
-  model: mongoose.model('album', albumSchema),
+  model: album,
   type: albumType,
   add: albumAdd
 }

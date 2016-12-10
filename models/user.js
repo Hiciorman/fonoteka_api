@@ -3,7 +3,7 @@ var bcrypt = require('bcrypt-nodejs');
 var mongoose = require('mongoose');
 mongoose.Promise = require('bluebird');
 
-var userSchema = mongoose.Schema({
+var user = mongoose.model('user',{
     nick: String,
     name: {
         first: String,
@@ -25,12 +25,12 @@ var userSchema = mongoose.Schema({
 
 // methods ======================
 // generating a hash
-// userSchema.methods.generateHash = function (password) {
+// user.methods.generateHash = function (password) {
 //     return bcrypt.hashSync(password, bcrypt.genSaltSync(8), null);
 // };
 
 // // checking if password is valid
-// userSchema.methods.validPassword = function (password) {
+// user.methods.validPassword = function (password) {
 //     return bcrypt.compareSync(password, this.local.password);
 // };
 
@@ -75,6 +75,6 @@ var userType = new graphql.GraphQLObjectType({
 })
 
 module.exports = {
-    model: mongoose.model('user', userSchema),
+    model: user,
     type: userType
 }

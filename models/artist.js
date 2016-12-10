@@ -2,15 +2,15 @@ var graphql = require('graphql');
 var mongoose = require('mongoose');
 mongoose.Promise = require('bluebird');
 
-var artistSchema = mongoose.Schema({
-    name: {
-        first: String,
-        last: String
-    },
-    birth_date: Date,
-    birth_place: String,
-    death_date: Date,
-    albums: [mongoose.Schema.Types.ObjectId]
+var artist = mongoose.model('artist', {
+    name: String,
+    realName: String,
+    description: String,
+    members: [mongoose.Schema.Types.ObjectId], // if band
+    bands: [mongoose.Schema.Types.ObjectId], // if person
+    albums: [mongoose.Schema.Types.ObjectId],
+    aliases: [mongoose.Schema.Types.ObjectId]
+    //photos: TODO:Add photos
 })
 
 var artistType = new graphql.GraphQLObjectType({
@@ -19,28 +19,25 @@ var artistType = new graphql.GraphQLObjectType({
         _id: {
             type: graphql.GraphQLID
         },
-        first: {
-            type: graphql.GraphQLString,
-            resolve(obj) {
-                return obj.name.first
-            }
-        },
-        last: {
-            type: graphql.GraphQLString,
-            resolve(obj) {
-                return obj.name.last
-            }
-        },
-        birth_date: {
+        name: {
             type: graphql.GraphQLString
         },
-        birth_place: {
+        realName: {
             type: graphql.GraphQLString
         },
-        death_date: {
+        description: {
             type: graphql.GraphQLString
+        },
+        members: {
+            type: new graphql.GraphQLList(graphql.GraphQLID)
+        },
+        bands: {
+            type: new graphql.GraphQLList(graphql.GraphQLID)
         },
         albums: {
+            type: new graphql.GraphQLList(graphql.GraphQLID)
+        },
+        aliases: {
             type: new graphql.GraphQLList(graphql.GraphQLID)
         }
     }
@@ -50,41 +47,39 @@ var artistAdd = {
     type: artistType,
     description: 'Add artist',
     args: {
-        first: {
-            name: 'first',
+        name: {
+            name: 'name',
             type: new graphql.GraphQLNonNull(graphql.GraphQLString)
         },
-        last: {
-            name: 'last',
+        realName: {
+            name: 'realName',
             type: new graphql.GraphQLNonNull(graphql.GraphQLString)
         },
-        birth_date: {
-            name: 'birth_date',
+        description: {
+            name: 'description',
             type: graphql.GraphQLString
         },
-        birth_place: {
-            name: 'birth_place',
-            type: graphql.GraphQLString
+        members: {
+            name: 'members',
+            type: new graphql.GraphQLList(graphql.GraphQLID)
         },
-        death_date: {
-            name: 'death_date',
-            type: graphql.GraphQLString
+        bands: {
+            name: 'bands',
+            type: new graphql.GraphQLList(graphql.GraphQLID)
         },
-        albums: {
-            name: 'albums',
+        aliases: {
+            name: 'aliases',
             type: new graphql.GraphQLList(graphql.GraphQLID)
         }
     },
     resolve: (root, args) => {
         var newArtist = new artist({
-            name: {
-                first: args.first,
-                last: args.last,
-            },
-            birth_date: args.birth_date,
-            birth_place: args.birth_place,
-            death_date: args.death_date,
-            albums: args.albums
+            name: args.name,
+            realName: args.realName,
+            description: args.description,
+            members: args.members,
+            bands: args.bands,
+            aliases: args.aliases
         })
         return new Promise((resolve, reject) => {
             newArtist.save(function (err) {
@@ -96,7 +91,7 @@ var artistAdd = {
 }
 
 module.exports = {
-    model: mongoose.model('artist', artistSchema),
+    model: artist,
     type: artistType,
     add: artistAdd
 }
