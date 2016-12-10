@@ -1,5 +1,6 @@
 var graphql = require('graphql');
 var mongoose = require('mongoose');
+var ObjectID = require('mongodb').ObjectID;
 mongoose.connect('mongodb://localhost/fonoteka');
 mongoose.Promise = require('bluebird');
 
@@ -13,8 +14,12 @@ var query = new graphql.GraphQLObjectType({
         users: {
             type: new graphql.GraphQLList(user.type),
             args: {
-                first: {
-                    name: 'first',
+                id: {
+                    name: 'id',
+                    type: graphql.GraphQLID
+                },
+                limit: {
+                    name: 'limit',
                     type: graphql.GraphQLInt
                 }
             },
@@ -28,21 +33,26 @@ var query = new graphql.GraphQLObjectType({
                             else 
                                 resolve(users)
                         });
-                    if (args.first != null) {
-                        result.limit(args.first)
-                    }
+                    if (args._id != null) 
+                        result.where('_id').equals(new ObjectID(args._id))
+                    if (args.limit != null) 
+                        result.limit(args.limit)
                 })
             }
         },
         artists: {
             type: new graphql.GraphQLList(artist.type),
             args: {
+                id: {
+                    name: 'id',
+                    type: graphql.GraphQLString
+                },
                 name: {
                     name: 'name',
                     type: graphql.GraphQLString
                 },
-                first: {
-                    name: 'first',
+                limit: {
+                    name: 'limit',
                     type: graphql.GraphQLInt
                 }
             },
@@ -56,10 +66,12 @@ var query = new graphql.GraphQLObjectType({
                             else 
                                 resolve(artists)
                         });
+                    if (args._id != null) 
+                        result.where('_id').equals(new ObjectID(args.id))
                     if (args.name != null) 
                         result.where('name').equals(args.name);
-                    if (args.first != null) 
-                        result.limit(args.first);
+                    if (args.limit != null) 
+                        result.limit(args.limit);
                     }
                 )
             }
@@ -67,12 +79,16 @@ var query = new graphql.GraphQLObjectType({
         albums: {
             type: new graphql.GraphQLList(album.type),
             args: {
+                id: {
+                    name: 'id',
+                    type: graphql.GraphQLID
+                },
                 title: {
                     name: 'title',
                     type: graphql.GraphQLString
                 },
-                first: {
-                    name: 'first',
+                limit: {
+                    name: 'limit',
                     type: graphql.GraphQLInt
                 }
             },
@@ -86,10 +102,12 @@ var query = new graphql.GraphQLObjectType({
                             else 
                                 resolve(albums)
                         });
+                    if (args._id != null) 
+                        result.where('_id').equals(new ObjectID(args.id))
                     if (args.name != null) 
                         result.where('name').equals(args.name);
-                    if (args.first != null) 
-                        result.limit(args.first);
+                    if (args.limit != null) 
+                        result.limit(args.limit);
                     }
                 )
             }
