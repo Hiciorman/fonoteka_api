@@ -33,8 +33,10 @@ var query = new graphql.GraphQLObjectType({
                             else 
                                 resolve(users)
                         });
-                    if (args._id != null) 
-                        result.where('_id').equals(new ObjectID(args._id))
+                    if (args.id != null) 
+                        result.where({
+                            _id: new ObjectID(args._id)
+                        })
                     if (args.limit != null) 
                         result.limit(args.limit)
                 })
@@ -66,14 +68,52 @@ var query = new graphql.GraphQLObjectType({
                             else 
                                 resolve(artists)
                         });
-                    if (args._id != null) 
-                        result.where('_id').equals(new ObjectID(args.id))
+                    if (args.id != null) 
+                        result.where({
+                            _id: new ObjectID(args.id)
+                        });
                     if (args.name != null) 
-                        result.where('name').equals(args.name);
+                        result.where({name: args.name});
                     if (args.limit != null) 
                         result.limit(args.limit);
                     }
                 )
+            }
+        },
+        rankedAlbums: {
+            type: new graphql.GraphQLList(album.type),
+            args: {
+                released: {
+                    name: 'released',
+                    type: graphql.GraphQLString
+                },
+                genre: {
+                    name: 'genre',
+                    type: graphql.GraphQLString
+                },
+                limit: {
+                    name: 'limit',
+                    type: new graphql.GraphQLNonNull(graphql.GraphQLInt)
+                }
+            },
+            resolve: (root, args) => {
+                return new Promise((resolve, reject) => {
+                    var result = album
+                        .model
+                        .find((err, albums) => {
+                            if (err) 
+                                reject(err)
+                            else 
+                                resolve(albums)
+                        });
+                    
+                    if (args.released != null) 
+                        result.where({released: args.released});
+                    if (args.genre != null) 
+                        result.where({genres: args.genre})
+
+                    result.limit(args.limit);
+                })
             }
         },
         albums: {
@@ -102,10 +142,12 @@ var query = new graphql.GraphQLObjectType({
                             else 
                                 resolve(albums)
                         });
-                    if (args._id != null) 
-                        result.where('_id').equals(new ObjectID(args.id))
-                    if (args.name != null) 
-                        result.where('name').equals(args.name);
+                    if (args.id != null) 
+                        result.where({
+                            _id: new ObjectID(args.id)
+                        })
+                    if (args.title != null) 
+                        result.where({title: args.title});
                     if (args.limit != null) 
                         result.limit(args.limit);
                     }
@@ -119,7 +161,9 @@ var mutationType = new graphql.GraphQLObjectType({
     name: 'Mutation',
     fields: {
         artistAdd: artist.add,
-        albumAdd: album.add
+        albumAdd: album.add,
+        albumEdit: album.edit,
+        ratingAdd: album.addRating
     }
 });
 

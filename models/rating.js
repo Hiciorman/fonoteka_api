@@ -1,10 +1,10 @@
 var graphql = require('graphql');
 var mongoose = require('mongoose');
 
-var rating = {
+var rating = new mongoose.Schema({
     user_id: mongoose.Schema.Types.ObjectId,
     rate: Number
-}
+})
 
 var ratingSchemaGraphQL = {
     _id: {
