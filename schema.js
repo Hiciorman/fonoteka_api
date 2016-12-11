@@ -161,9 +161,13 @@ var mutationType = new graphql.GraphQLObjectType({
     name: 'Mutation',
     fields: {
         artistAdd: artist.add,
+        artistEdit: artist.edit,
+        artistDelete: artist.delete,
         albumAdd: album.add,
         albumEdit: album.edit,
-        ratingAdd: album.addRating
+        albumDelete: album.delete,
+        ratingAdd: album.addRating,
+        ratingEdit: album.editRating
     }
 });
 

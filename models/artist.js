@@ -90,8 +90,91 @@ var artistAdd = {
     }
 }
 
+var artistEdit = {
+    type: artistType,
+    description: 'Edit artist',
+    args: {
+        _id: {
+            name: "_id",
+            type: new graphql.GraphQLNonNull(graphql.GraphQLID)
+        },
+        name: {
+            name: 'name',
+            type: new graphql.GraphQLNonNull(graphql.GraphQLString)
+        },
+        realName: {
+            name: 'realName',
+            type: new graphql.GraphQLNonNull(graphql.GraphQLString)
+        },
+        description: {
+            name: 'description',
+            type: graphql.GraphQLString
+        },
+        members: {
+            name: 'members',
+            type: new graphql.GraphQLList(graphql.GraphQLID)
+        },
+        bands: {
+            name: 'bands',
+            type: new graphql.GraphQLList(graphql.GraphQLID)
+        },
+        aliases: {
+            name: 'aliases',
+            type: new graphql.GraphQLList(graphql.GraphQLID)
+        }
+    },
+    resolve: (root, args) => {
+        return new Promise((resolve, reject) => {
+            artist.findOneAndUpdate({ "_id": args._id },
+                {
+                    "$set": {
+                        "name": args.name,
+                        "realName": args.realName,
+                        "description": args.description,
+                        "members": args.members,
+                        "bands": args.bands,
+                        "aliases": args.aliases
+                    }
+                },
+                function (err, doc) {
+                    if (err)
+                        reject(err);
+
+                    resolve(args);
+                }
+            )
+        })
+    }
+}
+
+var artistDelete = {
+    type: artistType,
+    description: 'Delete artist',
+    args: {
+        _id: {
+            name: '_id',
+            type: new graphql.GraphQLNonNull(graphql.GraphQLID)
+        }
+    },
+    resolve: (root, args) => {
+        return new Promise((resolve, reject) => {
+            artist.remove({ "_id": args._id },
+                function (err, doc) {
+                    if (err)
+                        reject(err);
+
+                    resolve(args);
+                }
+            )
+        }
+        )
+    }
+}
+
 module.exports = {
     model: artist,
     type: artistType,
-    add: artistAdd
+    add: artistAdd,
+    edit: artistEdit,
+    delete: artistDelete
 }

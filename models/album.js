@@ -96,9 +96,9 @@ var albumAdd = {
     return new Promise((resolve, reject) => {
       newAlbum
         .save(function (err) {
-          if (err) 
+          if (err)
             reject(err)
-          else 
+          else
             resolve(newAlbum)
         })
     })
@@ -109,13 +109,13 @@ var albumEdit = {
   type: albumType,
   description: 'Edit album',
   args: {
-    album_id: {
-      name: 'album_id',
+    _id: {
+      name: '_id',
       type: new graphql.GraphQLNonNull(graphql.GraphQLID)
     },
     title: {
       name: 'title',
-      type: graphql.GraphQLString
+      type: new graphql.GraphQLNonNull(graphql.GraphQLString)
     },
     artists: {
       name: 'artists',
@@ -144,39 +144,55 @@ var albumEdit = {
   },
   resolve: (root, args) => {
     return new Promise((resolve, reject) => {
-    album.findById(args.album_id, function (err, updatedAlbum) {
-        if (err) 
-          reject(err);
-     
-      if(args.title != null)
-        updatedAlbum.title = args.title;
-      if(args.artists != null)
-      updatedAlbum.artists = args.artists;
-      if(args.cover != null)
-      updatedAlbum.cover = args.cover;
-      if(args.released != null)
-      updatedAlbum.released = args.released;
-      if(args.length != null)
-      updatedAlbum.length = args.length;
-      if(args.genres != null)
-      updatedAlbum.genres = args.genres;
-      if(args.tracks != null)
-      updatedAlbum.tracks = args.tracks;
+      album.findOneAndUpdate({ "_id": args._id },
+        {
+          "$set": {
+            "title": args.title,
+            "artists": args.artists,
+            "cover": args.cover,
+            "released": args.released,
+            "length": args.length,
+            "genres": args.genres,
+            "tracks": args.tracks
+          }
+        },
+        function (err, doc) {
+          if (err)
+            reject(err);
 
-      updatedAlbum.save(function (err, result) {
-          if (err) 
-            reject(err);  
+          resolve(args);
+        }
+      )}
+    )
+  }
+}
 
-          resolve(result);
-          });
-        })
-    })
+var albumDelete = {
+  type: albumType,
+  description: 'Delete album',
+  args: {
+    _id: {
+      name: '_id',
+      type: new graphql.GraphQLNonNull(graphql.GraphQLID)
+    }
+  },
+  resolve: (root, args) => {
+    return new Promise((resolve, reject) => {
+      album.remove({ "_id": args._id },
+        function (err, doc) {
+          if (err)
+            reject(err);
+
+          resolve(args);
+        }
+      )}
+    )
   }
 }
 
 var ratingAdd = {
   type: rating.outputType,
-  description: "Add rating to album",
+  description: "Add album rating",
   args: {
     album_id: {
       name: 'album_id',
@@ -198,18 +214,54 @@ var ratingAdd = {
       rate: args.rate
     }
     return new Promise((resolve, reject) => {
-      album.findById(args.album_id, function (err, updatedAlbum) {
-        if (err) 
-          reject(err);
-          
-        updatedAlbum.ratings.push(newRating);
+      album.findOneAndUpdate({ "_id": args.album_id },
+        {
+          "$push": {
+            "ratings": newRating
+          }
+        },
+        function (err, doc) {
+          if (err)
+            reject(err);
 
-        updatedAlbum.save(function (err, result) {
-          if (err) 
-            reject(err);  
+          resolve(newRating);
+        }
+      )
+    })
+  }
+}
+
+var ratingEdit = {
+  type: rating.outputType,
+  description: "Edit album rating",
+  args: {
+    album_id: {
+      name: 'album_id',
+      type: new graphql.GraphQLNonNull(graphql.GraphQLID)
+    },
+    rating_id: {
+      name: "rating_id",
+      type: new graphql.GraphQLNonNull(graphql.GraphQLID)
+    },
+    rate: {
+      name: 'rate',
+      type: new graphql.GraphQLNonNull(graphql.GraphQLInt)
+    }
+  },
+  resolve: (root, args) => {
+    return new Promise((resolve, reject) => {
+      album.findOneAndUpdate(
+        { "_id": args.album_id, "ratings._id": args.rating_id },
+        {
+          "$set": {
+            "ratings.$.rate": args.rate
+          }
+        },
+        function (err, result) {
+          if (err)
+            reject(err);
 
           resolve(result);
-          });
         })
     })
   }
@@ -220,5 +272,7 @@ module.exports = {
   type: albumType,
   add: albumAdd,
   edit: albumEdit,
-  addRating: ratingAdd
+  delete: albumDelete,
+  addRating: ratingAdd,
+  editRating: ratingEdit
 }
