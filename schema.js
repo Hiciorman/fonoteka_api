@@ -28,16 +28,16 @@ var query = new graphql.GraphQLObjectType({
                     var result = user
                         .model
                         .find((err, users) => {
-                            if (err) 
+                            if (err)
                                 reject(err)
-                            else 
+                            else
                                 resolve(users)
                         });
-                    if (args.id != null) 
+                    if (args.id != null)
                         result.where({
                             _id: new ObjectID(args._id)
                         })
-                    if (args.limit != null) 
+                    if (args.limit != null)
                         result.limit(args.limit)
                 })
             }
@@ -63,59 +63,63 @@ var query = new graphql.GraphQLObjectType({
                     var result = artist
                         .model
                         .find((err, artists) => {
-                            if (err) 
+                            if (err)
                                 reject(err)
-                            else 
+                            else
                                 resolve(artists)
                         });
-                    if (args.id != null) 
+                    if (args.id != null)
                         result.where({
                             _id: new ObjectID(args.id)
                         });
-                    if (args.name != null) 
-                        result.where({name: args.name});
-                    if (args.limit != null) 
+                    if (args.name != null)
+                        result.where({ name: args.name });
+                    if (args.limit != null)
                         result.limit(args.limit);
-                    }
+                }
                 )
             }
         },
-        rankedAlbums: {
-            type: new graphql.GraphQLList(album.type),
-            args: {
-                released: {
-                    name: 'released',
-                    type: graphql.GraphQLString
-                },
-                genre: {
-                    name: 'genre',
-                    type: graphql.GraphQLString
-                },
-                limit: {
-                    name: 'limit',
-                    type: new graphql.GraphQLNonNull(graphql.GraphQLInt)
-                }
-            },
-            resolve: (root, args) => {
-                return new Promise((resolve, reject) => {
-                    var result = album
-                        .model
-                        .find((err, albums) => {
-                            if (err) 
-                                reject(err)
-                            else 
-                                resolve(albums)
-                        });
-                    
-                    if (args.released != null) 
-                        result.where({released: args.released});
-                    if (args.genre != null) 
-                        result.where({genres: args.genre})
+//         rankedAlbums: {
+//             type: new graphql.GraphQLList(album.type),
+//             args: {
+//                 released: {
+//                     name: 'released',
+//                     type: graphql.GraphQLString
+//                 },
+//                 genre: {
+//                     name: 'genre',
+//                     type: graphql.GraphQLString
+//                 },
+//                 limit: {
+//                     name: 'limit',
+//                     type: new graphql.GraphQLNonNull(graphql.GraphQLInt)
+//                 }
+//             },
+//             resolve: (root, args) => {
+//                 return new Promise((resolve, reject) => {
+//                    var result = album.model.aggregate([
+//                         { "$unwind": "$ratings" },
+//                         {
+//                             "$group": {
+//                                 "_id": "$_id",
+//                                 "averageRate": { "$avg": "$ratings.rate" }
+//                             }
+//                         },
+//                         { "$sort": {"averageRate": -1}}
+//                     ]);
+// //bind to rest of data 
+//                     if (args.released != null)
+//                         result.where({ released: args.released });
+//                     if (args.genre != null)
+//                         result.where({ genres: args.genre })
 
-                    result.limit(args.limit);
-                })
-            }
-        },
+//                     result.limit(args.limit);
+
+//                     resolve(result);
+//                 })
+//             }
+//         },
         albums: {
             type: new graphql.GraphQLList(album.type),
             args: {
@@ -137,20 +141,20 @@ var query = new graphql.GraphQLObjectType({
                     var result = album
                         .model
                         .find((err, albums) => {
-                            if (err) 
+                            if (err)
                                 reject(err)
-                            else 
+                            else
                                 resolve(albums)
                         });
-                    if (args.id != null) 
+                    if (args.id != null)
                         result.where({
                             _id: new ObjectID(args.id)
                         })
-                    if (args.title != null) 
-                        result.where({title: args.title});
-                    if (args.limit != null) 
+                    if (args.title != null)
+                        result.where({ title: args.title });
+                    if (args.limit != null)
                         result.limit(args.limit);
-                    }
+                }
                 )
             }
         }
@@ -171,4 +175,4 @@ var mutationType = new graphql.GraphQLObjectType({
     }
 });
 
-module.exports = new graphql.GraphQLSchema({query: query, mutation: mutationType});
+module.exports = new graphql.GraphQLSchema({ query: query, mutation: mutationType });

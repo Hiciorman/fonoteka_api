@@ -1,11 +1,10 @@
 var graphql = require('graphql');
 var mongoose = require('mongoose');
-var ObjectID = require('mongodb').ObjectID;
 mongoose.Promise = require('bluebird');
 var track = require('./track');
 var rating = require('./rating');
 
-var album = mongoose.model('album', {
+var schema = new mongoose.Schema({
   title: String,
   artists: [mongoose.Schema.Types.ObjectId],
   cover: String,
@@ -15,6 +14,8 @@ var album = mongoose.model('album', {
   tracks: [track.schema],
   ratings: [rating.schema]
 })
+
+var album = mongoose.model('album', schema);
 
 var albumType = new graphql.GraphQLObjectType({
   name: 'Album',
@@ -43,6 +44,9 @@ var albumType = new graphql.GraphQLObjectType({
     },
     tracks: {
       type: new graphql.GraphQLList(track.outputType)
+    },
+    averageRate: {
+      type: graphql.GraphQLFloat
     },
     ratings: {
       type: new graphql.GraphQLList(rating.outputType)
@@ -96,9 +100,9 @@ var albumAdd = {
     return new Promise((resolve, reject) => {
       newAlbum
         .save(function (err) {
-          if (err)
+          if (err) 
             reject(err)
-          else
+          else 
             resolve(newAlbum)
         })
     })
@@ -144,8 +148,10 @@ var albumEdit = {
   },
   resolve: (root, args) => {
     return new Promise((resolve, reject) => {
-      album.findOneAndUpdate({ "_id": args._id },
-        {
+      album
+        .findOneAndUpdate({
+          "_id": args._id
+        }, {
           "$set": {
             "title": args.title,
             "artists": args.artists,
@@ -155,15 +161,13 @@ var albumEdit = {
             "genres": args.genres,
             "tracks": args.tracks
           }
-        },
-        function (err, doc) {
-          if (err)
+        }, function (err, doc) {
+          if (err) 
             reject(err);
-
+          
           resolve(args);
-        }
-      )}
-    )
+        })
+    })
   }
 }
 
@@ -178,15 +182,16 @@ var albumDelete = {
   },
   resolve: (root, args) => {
     return new Promise((resolve, reject) => {
-      album.remove({ "_id": args._id },
-        function (err, doc) {
-          if (err)
+      album
+        .remove({
+          "_id": args._id
+        }, function (err, doc) {
+          if (err) 
             reject(err);
-
+          
           resolve(args);
-        }
-      )}
-    )
+        })
+    })
   }
 }
 
@@ -209,24 +214,31 @@ var ratingAdd = {
   },
   resolve: (root, args) => {
     var newRating = {
-      _id: new ObjectID(),
       user_id: args.user_id,
       rate: args.rate
     }
     return new Promise((resolve, reject) => {
-      album.findOneAndUpdate({ "_id": args.album_id },
-        {
-          "$push": {
-            "ratings": newRating
-          }
-        },
-        function (err, doc) {
-          if (err)
-            reject(err);
-
-          resolve(newRating);
-        }
-      )
+      if (newRating.rate < 1 || newRating.rate > 10) 
+        reject("Rate should be between 1-10");
+      else {
+        album
+          .findOneAndUpdate({
+            "_id": args.album_id,
+            "ratings.user_id": {
+              $ne: args.user_id
+            }
+          }, {
+            "$push": {
+              "ratings": newRating
+            }
+          }, function (err, doc) {
+            if (err) 
+              reject(err);
+            else 
+              resolve(newRating);
+            }
+          )
+      }
     })
   }
 }
@@ -239,8 +251,8 @@ var ratingEdit = {
       name: 'album_id',
       type: new graphql.GraphQLNonNull(graphql.GraphQLID)
     },
-    rating_id: {
-      name: "rating_id",
+    user_id: {
+      name: "user_id",
       type: new graphql.GraphQLNonNull(graphql.GraphQLID)
     },
     rate: {
@@ -250,17 +262,20 @@ var ratingEdit = {
   },
   resolve: (root, args) => {
     return new Promise((resolve, reject) => {
-      album.findOneAndUpdate(
-        { "_id": args.album_id, "ratings._id": args.rating_id },
-        {
+      album
+        .findOneAndUpdate({
+          "_id": args.album_id,
+          "ratings.user_id": args.user_id
+        }, {
           "$set": {
             "ratings.$.rate": args.rate
           }
-        },
-        function (err, result) {
-          if (err)
+        }, {
+          runValidators: true
+        }, function (err, result) {
+          if (err) 
             reject(err);
-
+          
           resolve(result);
         })
     })

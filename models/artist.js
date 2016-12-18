@@ -82,10 +82,13 @@ var artistAdd = {
             aliases: args.aliases
         })
         return new Promise((resolve, reject) => {
-            newArtist.save(function (err) {
-                if (err) reject(err)
-                else resolve(newArtist)
-            })
+            newArtist
+                .save(function (err) {
+                    if (err) 
+                        reject(err)
+                    else 
+                        resolve(newArtist)
+                })
         })
     }
 }
@@ -125,8 +128,10 @@ var artistEdit = {
     },
     resolve: (root, args) => {
         return new Promise((resolve, reject) => {
-            artist.findOneAndUpdate({ "_id": args._id },
-                {
+            artist
+                .findOneAndUpdate({
+                    "_id": args._id
+                }, {
                     "$set": {
                         "name": args.name,
                         "realName": args.realName,
@@ -135,14 +140,12 @@ var artistEdit = {
                         "bands": args.bands,
                         "aliases": args.aliases
                     }
-                },
-                function (err, doc) {
-                    if (err)
+                }, function (err, doc) {
+                    if (err) 
                         reject(err);
-
+                    
                     resolve(args);
-                }
-            )
+                })
         })
     }
 }
@@ -158,16 +161,16 @@ var artistDelete = {
     },
     resolve: (root, args) => {
         return new Promise((resolve, reject) => {
-            artist.remove({ "_id": args._id },
-                function (err, doc) {
-                    if (err)
+            artist
+                .remove({
+                    "_id": args._id
+                }, function (err, doc) {
+                    if (err) 
                         reject(err);
-
+                    
                     resolve(args);
-                }
-            )
-        }
-        )
+                })
+        })
     }
 }
 

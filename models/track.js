@@ -1,11 +1,12 @@
 var graphql = require('graphql');
+var mongoose = require('mongoose');
 
-var track = {
+var track = new mongoose.Schema({
   id: Number,
   feat: String,
   title: String,
   length: String
-}
+}, {_id: false})
 
 var trackSchemaGraphQL = {
   id: {
@@ -22,16 +23,9 @@ var trackSchemaGraphQL = {
   }
 }
 
-var trackInputType = new graphql.GraphQLInputObjectType({
-  name: '_Track',
-  fields: trackSchemaGraphQL
-})
+var trackInputType = new graphql.GraphQLInputObjectType({name: '_Track', fields: trackSchemaGraphQL})
 
-var trackOutputType = new graphql.GraphQLObjectType({
-  name: 'Track',
-  fields: trackSchemaGraphQL
-
-})
+var trackOutputType = new graphql.GraphQLObjectType({name: 'Track', fields: trackSchemaGraphQL})
 
 module.exports = {
   schema: track,
