@@ -80,46 +80,48 @@ var query = new graphql.GraphQLObjectType({
                 )
             }
         },
-//         rankedAlbums: {
-//             type: new graphql.GraphQLList(album.type),
-//             args: {
-//                 released: {
-//                     name: 'released',
-//                     type: graphql.GraphQLString
-//                 },
-//                 genre: {
-//                     name: 'genre',
-//                     type: graphql.GraphQLString
-//                 },
-//                 limit: {
-//                     name: 'limit',
-//                     type: new graphql.GraphQLNonNull(graphql.GraphQLInt)
-//                 }
-//             },
-//             resolve: (root, args) => {
-//                 return new Promise((resolve, reject) => {
-//                    var result = album.model.aggregate([
-//                         { "$unwind": "$ratings" },
-//                         {
-//                             "$group": {
-//                                 "_id": "$_id",
-//                                 "averageRate": { "$avg": "$ratings.rate" }
-//                             }
-//                         },
-//                         { "$sort": {"averageRate": -1}}
-//                     ]);
-// //bind to rest of data 
-//                     if (args.released != null)
-//                         result.where({ released: args.released });
-//                     if (args.genre != null)
-//                         result.where({ genres: args.genre })
+        rankedAlbums: {
+            type: new graphql.GraphQLList(album.type),
+            args: {
+                released: {
+                    name: 'released',
+                    type: graphql.GraphQLString
+                },
+                genre: {
+                    name: 'genre',
+                    type: graphql.GraphQLString
+                },
+                limit: {
+                    name: 'limit',
+                    type: new graphql.GraphQLNonNull(graphql.GraphQLInt)
+                }
+            },
+            resolve: (root, args) => {
+                return new Promise((resolve, reject) => {
+                   var result = album.model.aggregate([
+                        { "$unwind": "$ratings" },
+                        {
+                            "$group": {
+                                "_id": "$_id",
+                                "title": { "$first": "$title"},
+                                "released": { "$first": "$released"},
+                                "averageRate": { "$avg": "$ratings.rate" }
+                            }
+                        },
+                        { "$sort": {"averageRate": -1}}
+                    ]);
+//bind to rest of data 
+                    if (args.released != null)
+                        result.where({ released: args.released });
+                    if (args.genre != null)
+                        result.where({ genres: args.genre })
 
-//                     result.limit(args.limit);
+                    result.limit(args.limit);
 
-//                     resolve(result);
-//                 })
-//             }
-//         },
+                    resolve(result);
+                })
+            }
+        },
         albums: {
             type: new graphql.GraphQLList(album.type),
             args: {
