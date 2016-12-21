@@ -32,6 +32,6 @@ app.use('/graphql', graphQLHTTP((req, res) => {
   }
 }));
 
-app.listen(4000, function (err) {
+app.listen(process.env.PORT || 4000, function (err) {
   console.log('GraphQL Server is now running on localhost:4000');
 });
