@@ -1,39 +1,17 @@
 var graphql = require('graphql');
 var bcrypt = require('bcrypt-nodejs');
 var mongoose = require('mongoose');
+var passportLocalMongoose = require('passport-local-mongoose');
 mongoose.Promise = require('bluebird');
 
-var user = mongoose.model('user',{
-    nick: String,
-    name: {
-        first: String,
-        last: String
-    },
-    // local: {
-    //     email: String,
-    //     password: String,
-    // },
-    lastLogin: {
-        type: Date,
-        default: Date.now
-    },
-    created: {
-        type: Date,
-        default: Date.now
-    }
+var schema = new mongoose.Schema({
+    username: String,
+    password: String
 })
 
-// methods ======================
-// generating a hash
-// user.methods.generateHash = function (password) {
-//     return bcrypt.hashSync(password, bcrypt.genSaltSync(8), null);
-// };
+schema.plugin(passportLocalMongoose);
 
-// // checking if password is valid
-// user.methods.validPassword = function (password) {
-//     return bcrypt.compareSync(password, this.local.password);
-// };
-
+var user = mongoose.model('user', schema)
 
 var userType = new graphql.GraphQLObjectType({
     name: 'User',
@@ -41,34 +19,7 @@ var userType = new graphql.GraphQLObjectType({
         _id: {
             type: graphql.GraphQLID
         },
-        nick: {
-            type: graphql.GraphQLString
-        },
-        first: {
-            type: graphql.GraphQLString,
-            resolve(obj) {
-                return obj.name.first
-            }
-        },
-        last: {
-            type: graphql.GraphQLString,
-            resolve(obj) {
-                return obj.name.last
-            }
-        },
-        // email: {
-        //     type: graphql.GraphQLString
-        // },
-        // passwordHash: {
-        //     type: graphql.GraphQLString
-        // },
-        // passwordSalt: {
-        //     type: graphql.GraphQLString
-        // },
-        lastLogin: {
-            type: graphql.GraphQLString
-        },
-        created: {
+        username: {
             type: graphql.GraphQLString
         }
     }

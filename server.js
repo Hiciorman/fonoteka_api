@@ -1,35 +1,53 @@
 var express = require('express');
+var bodyParser = require('body-parser')
 var graphQLHTTP = require('express-graphql');
-// var flash = require('connect-flash');
-// var passport = require('passport');
-// var Strategy = require('passport-http').BasicStrategy;
+var passport = require('passport');
+var LocalStrategy = require('passport-local').Strategy;
 var Schema = require('./schema.js');
-
+var User = require('./models/user').model;
+var WebAppUrl = 'http://localhost:5000';
 var app = express();
-// app.use(flash());
+app.use(bodyParser.urlencoded({extended: false}))
+app.use(bodyParser.json())
+app.use(passport.initialize());
+app.use(passport.session());
 
-// passport.use(new Strategy(
-//   function(username, password, cb) {
-//     db.users.findByUsername(username, function(err, user) {
-//       if (err) { return cb(err); }
-//       if (!user) { return cb(null, false); }
-//       if (user.password != password) { return cb(null, false); }
-//       return cb(null, user);
-//     });
-//   }));
+passport.use(new LocalStrategy(User.authenticate()));
+passport.serializeUser(User.serializeUser());
+passport.deserializeUser(User.deserializeUser());
 
-// app.get('/',
-//   passport.authenticate('basic', { session: false }),
-//   function(req, res) {
-//     res.json({ username: req.user.username, email: req.user.emails[0].value });
-//   });
+app.post('/register', function (req, res) {
+  res.header('Access-Control-Allow-Origin', '*');
+  User
+    .register(new User({username: req.body.username}), req.body.password, function (err, account) {
+      if (err) {
+         res.sendStatus(500);
+      }
+
+      passport.authenticate('local')(req, res, function () {
+        res.sendStatus(200);
+      });
+    });
+})
+
+app.post('/login', passport.authenticate('local'), function (req, res) {
+   res.sendStatus(200);
+});
+
+app.get('/logout', function (req, res) {
+  req.logout();
+   res.sendStatus(200);
+});
+
+app.use(function(req, res, next) {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+  next();
+});
 
 app.use('/graphql', graphQLHTTP((req, res) => {
   res.header('Access-Control-Allow-Origin', '*');
-  return {
-    schema: Schema,
-    graphiql: true,
-  }
+  return {schema: Schema, graphiql: true}
 }));
 
 app.listen(process.env.PORT || 4000, function (err) {
