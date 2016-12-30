@@ -18,28 +18,33 @@ passport.deserializeUser(User.deserializeUser());
 
 app.post('/register', function (req, res) {
   res.header('Access-Control-Allow-Origin', '*');
-  User
-    .register(new User({username: req.body.username}), req.body.password, function (err, account) {
-      if (err) {
-         res.sendStatus(500);
-      }
-
+  User.register(new User({username: req.body.username}), req.body.password, function (err, account) {
+    if (err) {
+      res
+        .status(500)
+        .send({name: err.name, message: err.message});
+    } else {
       passport.authenticate('local')(req, res, function () {
         res.sendStatus(200);
       });
-    });
+    }
+  });
 })
 
-app.post('/login', passport.authenticate('local'), function (req, res) {
-   res.sendStatus(200);
+app.post('/login', function (req, res) {
+  res.header('Access-Control-Allow-Origin', '*');
+
+  passport.authenticate('local')(req, res, function () {
+    res.sendStatus(200);
+  });
 });
 
 app.get('/logout', function (req, res) {
   req.logout();
-   res.sendStatus(200);
+  res.sendStatus(200);
 });
 
-app.use(function(req, res, next) {
+app.use(function (req, res, next) {
   res.header("Access-Control-Allow-Origin", "*");
   res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
   next();
