@@ -31,17 +31,21 @@ app.post('/register', function (req, res) {
   });
 })
 
-app.post('/login', function (req, res) {
+app.post('/login', function (req, res, next) {
   res.header('Access-Control-Allow-Origin', '*');
 
-  passport.authenticate('local')(req, res, function () {
-    res.sendStatus(200);
-  });
-});
-
-app.get('/logout', function (req, res) {
-  req.logout();
-  res.sendStatus(200);
+  passport.authenticate('local', (err, data) => {
+    if (err) {
+      res
+        .status(500)
+        .send({name: err.name, message: err.message});
+    }
+    else{
+      res
+        .status(200)
+        .send({userId: data._doc._id.toString()});
+    }
+  })(req, res, next);
 });
 
 app.use(function (req, res, next) {
