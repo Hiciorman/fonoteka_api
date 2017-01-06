@@ -1,13 +1,17 @@
 var graphql = require('graphql');
 var mongoose = require('mongoose');
+var autoIncrement = require('mongoose-auto-increment');
 var ObjectID = require('mongodb').ObjectID;
-mongoose.connect('mongodb://localhost/fonoteka');
+var connection = mongoose.connect('mongodb://localhost/fonoteka');
+autoIncrement.initialize(connection);
 mongoose.Promise = require('bluebird');
 
 var user = require('./models/user')
 var artist = require('./models/artist');
 var album = require('./models/album');
 var post = require('./models/post');
+var genre = require('./models/genre');
+genre.schema.plugin(autoIncrement.plugin, 'genre');
 
 var query = new graphql.GraphQLObjectType({
     name: 'query',
@@ -166,7 +170,45 @@ var query = new graphql.GraphQLObjectType({
                             _id: new ObjectID(args.id)
                         })
                     if (args.title != null) 
-                        result.where({title: args.title});
+                        result.where({title: { $regex: '(?i).*' + args.title + '.*'}});
+                    if (args.limit != null) 
+                        result.limit(args.limit);
+                    }
+                )
+            }
+        },
+        genres: {
+            type: new graphql.GraphQLList(genre.type),
+            args: {
+                id: {
+                    name: 'id',
+                    type: graphql.GraphQLID
+                },
+                label: {
+                    name: 'label',
+                    type: graphql.GraphQLString
+                },
+                limit: {
+                    name: 'limit',
+                    type: graphql.GraphQLInt
+                }
+            },
+            resolve: (root, args) => {
+                return new Promise((resolve, reject) => {
+                    var result = genre
+                        .model
+                        .find((err, genres) => {
+                            if (err) 
+                                reject(err)
+                            else 
+                                resolve(genres)
+                        });
+                    if (args.id != null) 
+                        result.where({
+                            _id: new ObjectID(args.id)
+                        })
+                    if (args.title != null) 
+                        result.where({title:args.title});
                     if (args.limit != null) 
                         result.limit(args.limit);
                     }
@@ -236,7 +278,9 @@ var mutationType = new graphql.GraphQLObjectType({
         albumDelete: album.delete,
         ratingAdd: album.addRating,
         ratingEdit: album.editRating,
-        postAdd: post.add
+        postAdd: post.add,
+        genreAdd: genre.add,
+        genreDelete: genre.delete
     }
 });
 
