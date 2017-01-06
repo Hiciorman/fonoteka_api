@@ -3,14 +3,22 @@ var mongoose = require('mongoose');
 mongoose.Promise = require('bluebird');
 var track = require('./track');
 var rating = require('./rating');
+var genre = require('./genre');
+var artist = require('./artist');
 
 var schema = new mongoose.Schema({
   title: String,
-  artists: [mongoose.Schema.Types.ObjectId],
+  artists: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'artist'
+  }],
   cover: String,
   released: Date,
   length: String,
-  genres: [String],
+  genres: [{
+    type: Number,
+    ref: 'genre'
+  }],
   tracks: [track.schema],
   ratings: [rating.schema]
 })
@@ -27,8 +35,7 @@ var albumType = new graphql.GraphQLObjectType({
       type: graphql.GraphQLString
     },
     artists: {
-      type: new graphql.GraphQLList(graphql.GraphQLID),
-      ref: 'Artist'
+      type: new graphql.GraphQLList(artist.type)
     },
     cover: {
       type: graphql.GraphQLString
@@ -40,7 +47,7 @@ var albumType = new graphql.GraphQLObjectType({
       type: graphql.GraphQLString
     },
     genres: {
-      type: new graphql.GraphQLList(graphql.GraphQLString)
+      type: new graphql.GraphQLList(genre.type)
     },
     tracks: {
       type: new graphql.GraphQLList(track.outputType)
@@ -80,7 +87,7 @@ var albumAdd = {
     },
     genres: {
       name: 'genres',
-      type: new graphql.GraphQLList(graphql.GraphQLString)
+      type: new graphql.GraphQLList(graphql.GraphQLInt)
     },
     tracks: {
       name: 'tracks',
@@ -139,7 +146,7 @@ var albumEdit = {
     },
     genres: {
       name: 'genres',
-      type: new graphql.GraphQLList(graphql.GraphQLString)
+      type: new graphql.GraphQLList(graphql.GraphQLInt)
     },
     tracks: {
       name: 'tracks',

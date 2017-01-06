@@ -16,7 +16,7 @@ var genreType = new graphql.GraphQLObjectType({
     name: 'Genre',
     fields: {
         _id: {
-            type: graphql.GraphQLID
+            type: graphql.GraphQLInt
         },
         label: {
             type: graphql.GraphQLString
@@ -52,7 +52,7 @@ var genreDelete = {
     args: {
         _id: {
             name: '_id',
-            type: new graphql.GraphQLNonNull(graphql.GraphQLID)
+            type: new graphql.GraphQLNonNull(graphql.GraphQLInt)
         }
     },
     resolve: (root, args) => {
@@ -66,7 +66,6 @@ var genreDelete = {
         })
     }
 }
-
 
 module.exports = {
     schema: schema,

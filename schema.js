@@ -150,6 +150,10 @@ var query = new graphql.GraphQLObjectType({
                     name: 'title',
                     type: graphql.GraphQLString
                 },
+                genres:{
+                    name: 'genres',
+                    type: new graphql.GraphQLList(graphql.GraphQLInt)
+                },
                 limit: {
                     name: 'limit',
                     type: graphql.GraphQLInt
@@ -159,22 +163,28 @@ var query = new graphql.GraphQLObjectType({
                 return new Promise((resolve, reject) => {
                     var result = album
                         .model
-                        .find((err, albums) => {
-                            if (err) 
-                                reject(err)
-                            else 
-                                resolve(albums)
-                        });
+                        .find()
+                        .populate('genres')
+                        .lean();
+
                     if (args.id != null) 
                         result.where({
                             _id: new ObjectID(args.id)
                         })
                     if (args.title != null) 
                         result.where({title: { $regex: '(?i).*' + args.title + '.*'}});
+                    if(args.genres != null)
+                        result.where({"genres": {$in: args.genres}})
                     if (args.limit != null) 
                         result.limit(args.limit);
-                    }
-                )
+
+                    result.exec((err, res) => {
+                        if (err) 
+                            reject(err);
+                        else 
+                            resolve(res);
+                    });
+                })
             }
         },
         genres: {
