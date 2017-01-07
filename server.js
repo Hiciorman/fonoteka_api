@@ -18,32 +18,35 @@ passport.deserializeUser(User.deserializeUser());
 
 app.post('/register', function (req, res) {
   res.header('Access-Control-Allow-Origin', '*');
-  User.register(new User({username: req.body.username}), req.body.password, function (err, account) {
+  // 100 - succesful 200 - not exists 300 - error
+  // 301 - username exists
+  // 302 - email exists
+  var newUser = new User({username: req.body.username, email: req.body.email});
+
+  User.register(newUser, req.body.password, function (err, account) {
     if (err) {
-      res
-        .status(500)
-        .send({name: err.name, message: err.message});
+      var status;
+      if(err.message.includes('username'))
+        status = 301;
+      if(err.message.includes('email'))
+        status = 302;
+      res.send({status: status, name: err.name, message: err.message});
     } else {
-      passport.authenticate('local')(req, res, function () {
-        res.sendStatus(200);
-      });
+      res.send({status: 100, userId: newUser._id, username: newUser.username});
     }
   });
 })
 
 app.post('/login', function (req, res, next) {
   res.header('Access-Control-Allow-Origin', '*');
-
+  // 100 - succesful 200 - not exists 300 - error
   passport.authenticate('local', (err, data) => {
     if (err) {
-      res
-        .status(500)
-        .send({name: err.name, message: err.message});
-    }
-    else{
-      res
-        .status(200)
-        .send({userId: data._doc._id.toString()});
+      res.send({status: 300, name: err.name, message: err.message});
+    } else if (!data) {
+      res.send({status: 200});
+    } else {
+      res.send({status: 100, userId: data._doc._id.toString(), username: data._doc.username});
     }
   })(req, res, next);
 });
