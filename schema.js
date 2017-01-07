@@ -165,6 +165,7 @@ var query = new graphql.GraphQLObjectType({
                         .model
                         .find()
                         .populate('genres')
+                        .populate('artists')
                         .lean();
 
                     if (args.id != null) 
