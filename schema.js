@@ -67,12 +67,10 @@ var query = new graphql.GraphQLObjectType({
                 return new Promise((resolve, reject) => {
                     var result = artist
                         .model
-                        .find((err, artists) => {
-                            if (err) 
-                                reject(err)
-                            else 
-                                resolve(artists)
-                        });
+                        .find();
+                        //.populate('albums')
+                       // .lean();
+
                     if (args.id != null) 
                         result.where({
                             _id: new ObjectID(args.id)
@@ -81,6 +79,13 @@ var query = new graphql.GraphQLObjectType({
                         result.where({name: args.name});
                     if (args.limit != null) 
                         result.limit(args.limit);
+
+                    result.exec((err, res) => {
+                        if (err) 
+                            reject(err);
+                        else 
+                            resolve(res);
+                    });
                     }
                 )
             }

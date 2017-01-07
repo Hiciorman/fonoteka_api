@@ -109,8 +109,15 @@ var albumAdd = {
         .save(function (err) {
           if (err) 
             reject(err)
-          else 
+          else {
+            args.artists.forEach(function(x) {
+              artist.model.findByIdAndUpdate(x,{"$push": {
+                "albums": x
+              }}).exec();
+
+            }, this);
             resolve(newAlbum)
+          }
         })
     })
   }

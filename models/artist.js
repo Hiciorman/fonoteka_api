@@ -6,11 +6,18 @@ var artist = mongoose.model('artist', {
     name: String,
     realName: String,
     description: String,
-    members: [mongoose.Schema.Types.ObjectId], // if band
-    bands: [mongoose.Schema.Types.ObjectId], // if person
-    albums: [mongoose.Schema.Types.ObjectId],
-    aliases: [mongoose.Schema.Types.ObjectId]
-    //photos: TODO:Add photos
+    // members: [{
+    //     type: mongoose.Schema.Types.ObjectId,
+    //     ref: 'artist'
+    // }], // if band
+    // bands: [{
+    //     type: mongoose.Schema.Types.ObjectId,
+    //     ref: 'artist'
+    // }], // if person
+    albums: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'album'
+    }]    //photos: TODO:Add photos
 })
 
 var artistType = new graphql.GraphQLObjectType({
@@ -28,16 +35,13 @@ var artistType = new graphql.GraphQLObjectType({
         description: {
             type: graphql.GraphQLString
         },
-        members: {
-            type: new graphql.GraphQLList(graphql.GraphQLID)
-        },
-        bands: {
-            type: new graphql.GraphQLList(graphql.GraphQLID)
-        },
+        // members: {
+        //     type: new graphql.GraphQLList(graphql.GraphQLID)
+        // },
+        // bands: {
+        //     type: new graphql.GraphQLList(graphql.GraphQLID)
+        // },
         albums: {
-            type: new graphql.GraphQLList(graphql.GraphQLID)
-        },
-        aliases: {
             type: new graphql.GraphQLList(graphql.GraphQLID)
         }
     }
@@ -59,27 +63,22 @@ var artistAdd = {
             name: 'description',
             type: graphql.GraphQLString
         },
-        members: {
-            name: 'members',
-            type: new graphql.GraphQLList(graphql.GraphQLID)
-        },
-        bands: {
-            name: 'bands',
-            type: new graphql.GraphQLList(graphql.GraphQLID)
-        },
-        aliases: {
-            name: 'aliases',
-            type: new graphql.GraphQLList(graphql.GraphQLID)
-        }
+        // members: {
+        //     name: 'members',
+        //     type: new graphql.GraphQLList(graphql.GraphQLID)
+        // },
+        // bands: {
+        //     name: 'bands',
+        //     type: new graphql.GraphQLList(graphql.GraphQLID)
+        // }
     },
     resolve: (root, args) => {
         var newArtist = new artist({
             name: args.name,
             realName: args.realName,
             description: args.description,
-            members: args.members,
-            bands: args.bands,
-            aliases: args.aliases
+            // members: args.members,
+            // bands: args.bands
         })
         return new Promise((resolve, reject) => {
             newArtist
@@ -113,18 +112,14 @@ var artistEdit = {
             name: 'description',
             type: graphql.GraphQLString
         },
-        members: {
-            name: 'members',
-            type: new graphql.GraphQLList(graphql.GraphQLID)
-        },
-        bands: {
-            name: 'bands',
-            type: new graphql.GraphQLList(graphql.GraphQLID)
-        },
-        aliases: {
-            name: 'aliases',
-            type: new graphql.GraphQLList(graphql.GraphQLID)
-        }
+        // members: {
+        //     name: 'members',
+        //     type: new graphql.GraphQLList(graphql.GraphQLID)
+        // },
+        // bands: {
+        //     name: 'bands',
+        //     type: new graphql.GraphQLList(graphql.GraphQLID)
+        // }
     },
     resolve: (root, args) => {
         return new Promise((resolve, reject) => {
@@ -136,9 +131,8 @@ var artistEdit = {
                         "name": args.name,
                         "realName": args.realName,
                         "description": args.description,
-                        "members": args.members,
-                        "bands": args.bands,
-                        "aliases": args.aliases
+                        // "members": args.members,
+                        // "bands": args.bands
                     }
                 }, function (err, doc) {
                     if (err) 
