@@ -40,7 +40,7 @@ var query = new graphql.GraphQLObjectType({
                         });
                     if (args.id != null) 
                         result.where({
-                            _id: new ObjectID(args._id)
+                            _id: new ObjectID(args.id)
                         })
                     if (args.limit != null) 
                         result.limit(args.limit)
@@ -70,13 +70,12 @@ var query = new graphql.GraphQLObjectType({
                         .find();
                         //.populate('albums')
                        // .lean();
-
                     if (args.id != null) 
                         result.where({
                             _id: new ObjectID(args.id)
                         });
                     if (args.name != null) 
-                        result.where({name: args.name});
+                        result.where({name: { $regex: '(?i).*' + args.name + '.*'}});
                     if (args.limit != null) 
                         result.limit(args.limit);
 
@@ -159,6 +158,10 @@ var query = new graphql.GraphQLObjectType({
                     name: 'genres',
                     type: new graphql.GraphQLList(graphql.GraphQLInt)
                 },
+                ratingUserId:{
+                    name: 'ratingUserId',
+                    type: graphql.GraphQLID
+                },
                 limit: {
                     name: 'limit',
                     type: graphql.GraphQLInt
@@ -181,13 +184,15 @@ var query = new graphql.GraphQLObjectType({
                         result.where({title: { $regex: '(?i).*' + args.title + '.*'}});
                     if(args.genres != null)
                         result.where({"genres": {$in: args.genres}})
+                    if(args.ratingUserId != null)
+                        result.where({"ratings.user_id": args.ratingUserId})
                     if (args.limit != null) 
                         result.limit(args.limit);
 
                     result.exec((err, res) => {
                         if (err) 
                             reject(err);
-                        else 
+                        else
                             resolve(res);
                     });
                 })

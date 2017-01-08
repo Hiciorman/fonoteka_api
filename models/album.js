@@ -110,6 +110,7 @@ var albumAdd = {
           if (err) 
             reject(err)
           else {
+            if(args.artists)
             args.artists.forEach(function(x) {
               artist.model.findByIdAndUpdate(x,{"$push": {
                 "albums": x
