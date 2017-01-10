@@ -32,18 +32,20 @@ var query = new graphql.GraphQLObjectType({
                 return new Promise((resolve, reject) => {
                     var result = user
                         .model
-                        .find((err, users) => {
-                            if (err) 
-                                reject(err)
-                            else 
-                                resolve(users)
-                        });
+                        .find();
                     if (args.id != null) 
                         result.where({
                             _id: new ObjectID(args.id)
                         })
                     if (args.limit != null) 
                         result.limit(args.limit)
+
+                     result.exec((err, res) => {
+                        if (err) 
+                            reject(err);
+                        else 
+                            resolve(res);
+                    });
                 })
             }
         },
