@@ -1,3 +1,4 @@
+var fs = require('fs');
 var graphql = require('graphql');
 var mongoose = require('mongoose');
 mongoose.Promise = require('bluebird');
@@ -95,6 +96,10 @@ var albumAdd = {
     }
   },
   resolve: (root, args) => {
+    if (!args.cover) {
+      var bitmap = fs.readFileSync('./images/emptyCover.jpg');
+      args.cover = new Buffer(bitmap).toString('base64');
+    }
     var newAlbum = new album({
       title: args.title,
       artists: args.artists,
