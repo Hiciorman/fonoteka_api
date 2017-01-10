@@ -52,13 +52,17 @@ app.post('/login', function (req, res, next) {
 });
 
 app.use(function (req, res, next) {
-  res.header("Access-Control-Allow-Origin", "*");
-  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+  res.setHeader("Access-Control-Allow-Origin", WebAppUrl);
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.setHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+
+  if (req.method === "OPTIONS") 
+        return res.status(200).end();
+  
   next();
 });
 
 app.use('/graphql', graphQLHTTP((req, res) => {
-  res.header('Access-Control-Allow-Origin', '*');
   return {schema: Schema, graphiql: true}
 }));
 
