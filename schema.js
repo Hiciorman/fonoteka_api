@@ -264,6 +264,7 @@ var query = new graphql.GraphQLObjectType({
                         .model
                         .find()
                         .populate('author')
+                        .populate('comments.author')
                         .lean();
 
                     if (args.id != null) 
@@ -302,6 +303,7 @@ var mutationType = new graphql.GraphQLObjectType({
         ratingAdd: album.addRating,
         ratingEdit: album.editRating,
         postAdd: post.add,
+        commentAdd: post.addComment,
         genreAdd: genre.add,
         genreDelete: genre.delete
     }

@@ -1,9 +1,11 @@
 var graphql = require('graphql');
 var mongoose = require('mongoose');
+var user = require('./user');
 
-var comment = new mongoose.Schema({
+var schema = new mongoose.Schema({
     author: {
         type: mongoose.Schema.Types.ObjectId,
+        ref: 'user',
         required: true
     },
     parent_id: {
@@ -19,17 +21,17 @@ var comment = new mongoose.Schema({
     }
 })
 
+var comment = mongoose.model('comment', schema);
+
 var commentSchemaGraphQL = {
     _id: {
       type: graphql.GraphQLID
     },
     author: {
-        type: graphql.GraphQLID,
-        ref: 'User'
+        type: user.type
     },
     parent_id: {
-        type: graphql.GraphQLID,
-        ref: 'Comment'
+        type: graphql.GraphQLID
     },
     body: {
         type: graphql.GraphQLString
@@ -44,7 +46,8 @@ var commentInputType = new graphql.GraphQLInputObjectType({name: '_Comment', fie
 var commentOutputType = new graphql.GraphQLObjectType({name: 'Comment', fields: commentSchemaGraphQL})
 
 module.exports = {
-    schema: comment,
+    schema: schema,
+    model: comment,
     inputType: commentInputType,
     outputType: commentOutputType
 }

@@ -57,7 +57,7 @@ var artistAdd = {
         },
         realName: {
             name: 'realName',
-            type: new graphql.GraphQLNonNull(graphql.GraphQLString)
+            type: graphql.GraphQLString
         },
         description: {
             name: 'description',
