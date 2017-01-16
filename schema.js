@@ -43,11 +43,11 @@ var query = new graphql.GraphQLObjectType({
                         .model
                         .find()
                     
-                    if (args.from != null && ObjectID.isValid(args.from)) 
+                    if (args.from != null) 
                         result.where({
                             from: new ObjectID(args.from)
                         })
-                    if (args.to != null && ObjectID.isValid(args.to)) 
+                    if (args.to != null) 
                         result.where({
                             to: new ObjectID(args.to)
                         })

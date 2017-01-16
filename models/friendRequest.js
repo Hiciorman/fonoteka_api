@@ -1,5 +1,6 @@
 var graphql = require('graphql');
 var mongoose = require('mongoose');
+var user = require('./user');
 
 var schema = new mongoose.Schema({
     from: mongoose.Schema.Types.ObjectId,
@@ -76,8 +77,18 @@ var friendRequestUpdate = {
         function (err, doc) {
             if (err) 
                 reject(err)
-            else 
-                resolve(doc)
+            else{
+                resolve(doc);
+                if (doc.status === 'OK') {
+                    user.model.findByIdAndUpdate(doc.from, {
+                        "$push": {"friends": doc.to}
+                    }).exec().then(()=>{
+                        user.model.findByIdAndUpdate(doc.to, {
+                            "$push": {"friends": doc.from}
+                        }).exec()
+                    })
+                }
+            }
         })
     })
   }
