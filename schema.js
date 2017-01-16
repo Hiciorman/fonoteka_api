@@ -6,6 +6,7 @@ var connection = mongoose.connect('mongodb://localhost/fonoteka');
 autoIncrement.initialize(connection);
 mongoose.Promise = require('bluebird');
 
+var friendRequest = require('./models/friendRequest');
 var user = require('./models/user')
 var artist = require('./models/artist');
 var album = require('./models/album');
@@ -16,6 +17,54 @@ genre.schema.plugin(autoIncrement.plugin, 'genre');
 var query = new graphql.GraphQLObjectType({
     name: 'query',
     fields: () => ({
+        friendRequests: {
+            type: new graphql.GraphQLList(friendRequest.type),
+            args: {
+                from: {
+                    name: 'from',
+                    type: graphql.GraphQLID
+                },
+                to: {
+                    name: 'to',
+                    type: graphql.GraphQLID
+                },
+                status: {
+                    name: 'status',
+                    type: graphql.GraphQLID
+                },
+                limit: {
+                    name: 'limit',
+                    type: graphql.GraphQLInt
+                }
+            },
+            resolve: (root, args) => {
+                return new Promise((resolve, reject) => {
+                    var result = friendRequest
+                        .model
+                        .find()
+                    
+                    if (args.from != null && ObjectID.isValid(args.from)) 
+                        result.where({
+                            from: new ObjectID(args.from)
+                        })
+                    if (args.to != null && ObjectID.isValid(args.to)) 
+                        result.where({
+                            to: new ObjectID(args.to)
+                        })
+                    if (args.status != null) 
+                        result.where({status: args.status})
+                    if (args.limit != null) 
+                        result.limit(args.limit)
+
+                     result.exec((err, res) => {
+                        if (err) 
+                            reject(err);
+                        else 
+                            resolve(res);
+                    });
+                })
+            }
+        },
         users: {
             type: new graphql.GraphQLList(user.type),
             args: {
@@ -32,7 +81,10 @@ var query = new graphql.GraphQLObjectType({
                 return new Promise((resolve, reject) => {
                     var result = user
                         .model
-                        .find();
+                        .find()
+                        .populate('friends')
+                        .lean();
+
                     if (args.id != null) 
                         result.where({
                             _id: new ObjectID(args.id)
@@ -294,6 +346,9 @@ var query = new graphql.GraphQLObjectType({
 var mutationType = new graphql.GraphQLObjectType({
     name: 'Mutation',
     fields: {
+        friendAdd: user.addFriend,
+        friendRequestAdd: friendRequest.add,
+        friendRequestUpdate: friendRequest.update,
         artistAdd: artist.add,
         artistEdit: artist.edit,
         artistDelete: artist.delete,
