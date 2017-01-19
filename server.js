@@ -7,8 +7,8 @@ var Schema = require('./schema.js');
 var User = require('./models/user').model;
 var WebAppUrl = 'http://localhost:5000';
 var app = express();
-app.use(bodyParser.urlencoded({extended: false}))
-app.use(bodyParser.json())
+app.use(bodyParser.urlencoded({extended: false, limit: '5mb'}))
+app.use(bodyParser.json({limit: '5mb'}))
 app.use(passport.initialize());
 app.use(passport.session());
 

@@ -14,6 +14,7 @@ var schema = new mongoose.Schema({
     ref: 'artist'
   }],
   cover: String,
+  sample: String,
   released: Date,
   length: String,
   genres: [{
@@ -39,6 +40,9 @@ var albumType = new graphql.GraphQLObjectType({
       type: new graphql.GraphQLList(artist.type)
     },
     cover: {
+      type: graphql.GraphQLString
+    },
+    sample: {
       type: graphql.GraphQLString
     },
     released: {
@@ -78,6 +82,10 @@ var albumAdd = {
       name: 'cover',
       type: graphql.GraphQLString
     },
+    sample: {
+      name: 'sample',
+      type: graphql.GraphQLString
+    },
     released: {
       name: 'released',
       type: graphql.GraphQLString
@@ -104,6 +112,7 @@ var albumAdd = {
       title: args.title,
       artists: args.artists,
       cover: args.cover,
+      sample: args.sample,
       released: args.released,
       length: args.length,
       genres: args.genres,
