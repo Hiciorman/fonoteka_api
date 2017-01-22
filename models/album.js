@@ -281,7 +281,7 @@ var ratingAdd = {
                   "_id": res[0]._id
                 }, {
                   "$set": {
-                    "averageRate": res[0].averageRate
+                    "averageRate": res[0].averageRate.toFixed(2)
                   }
                 }).exec();
 
