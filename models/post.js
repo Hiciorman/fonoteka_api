@@ -90,9 +90,9 @@ var postAdd = {
   }
 }
 
-var commentAdd = {
+var postCommentAdd = {
   type: comment.outputType,
-  description: 'Add comment',
+  description: 'Add comment to post',
   args: {
     post_id: {
       name: 'post_id',
@@ -143,5 +143,5 @@ module.exports = {
   model: post,
   type: postType,
   add: postAdd,
-  addComment: commentAdd
+  addComment: postCommentAdd
 }

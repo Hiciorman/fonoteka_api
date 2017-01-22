@@ -6,6 +6,7 @@ var track = require('./track');
 var rating = require('./rating');
 var genre = require('./genre');
 var artist = require('./artist');
+var comment = require('./comment');
 
 var schema = new mongoose.Schema({
   title: String,
@@ -22,7 +23,8 @@ var schema = new mongoose.Schema({
     ref: 'genre'
   }],
   tracks: [track.schema],
-  ratings: [rating.schema]
+  ratings: [rating.schema],
+  comments: [comment.schema]
 })
 
 var album = mongoose.model('album', schema);
@@ -62,6 +64,9 @@ var albumType = new graphql.GraphQLObjectType({
     },
     ratings: {
       type: new graphql.GraphQLList(rating.outputType)
+    },
+    comments: {
+      type: new graphql.GraphQLList(comment.outputType)
     }
   }
 })
@@ -312,6 +317,55 @@ var ratingEdit = {
   }
 }
 
+var albumCommentAdd = {
+  type: comment.outputType,
+  description: 'Add comment to album',
+  args: {
+    album_id: {
+      name: 'album_id',
+      type: new graphql.GraphQLNonNull(graphql.GraphQLID)
+    },
+    author: {
+      name: 'author',
+      type: new graphql.GraphQLNonNull(graphql.GraphQLID)
+    },
+    parent_id: {
+      name: 'createDate',
+      type: graphql.GraphQLID
+    },
+    body: {
+      name: 'body',
+      type: new graphql.GraphQLNonNull(graphql.GraphQLString)
+    }
+  },
+  resolve: (root, args) => {
+    var newComment = new comment.model({
+      author: args.author,
+      parent_id: args.parent_id,
+      body: args.body,
+      createDate: Date.now()
+    })
+
+    return new Promise((resolve, reject) => {
+      album.findByIdAndUpdate(args.album_id, {
+        "$push": {
+          "comments": newComment
+        }
+      }).exec().then(() => {
+          album.findById(args.album_id)
+            .populate('comments.author')
+            .lean()
+            .exec(function (err, res) {
+              if (err) 
+                reject(err)
+              else 
+                resolve(res.comments[res.comments.length - 1])
+            })
+        });
+    })
+  }
+}
+
 module.exports = {
   model: album,
   type: albumType,
@@ -319,5 +373,6 @@ module.exports = {
   edit: albumEdit,
   delete: albumDelete,
   addRating: ratingAdd,
-  editRating: ratingEdit
+  editRating: ratingEdit,
+  addComment: albumCommentAdd
 }
