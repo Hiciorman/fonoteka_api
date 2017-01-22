@@ -163,37 +163,26 @@ var query = new graphql.GraphQLObjectType({
                 return new Promise((resolve, reject) => {
                     var result = album
                         .model
-                        .aggregate([
-                            {
-                                "$unwind": "$ratings"
-                            }, {
-                                "$group": {
-                                    "_id": "$_id",
-                                    "title": {
-                                        "$first": "$title"
-                                    },
-                                    "released": {
-                                        "$first": "$released"
-                                    },
-                                    "averageRate": {
-                                        "$avg": "$ratings.rate"
-                                    }
-                                }
-                            }, {
-                                "$sort": {
-                                    "averageRate": -1
-                                }
-                            }
-                        ]);
-                    //bind to rest of data
+                        .find()
+                        .sort({averageRate: -1})
+                        .populate('genres')
+                        .populate('artists')
+                        .lean();
+
                     if (args.released != null) 
                         result.where({released: args.released});
                     if (args.genre != null) 
-                        result.where({genres: args.genre})
+                        result.where({"genres": {$in: args.genres}})
 
                     result.limit(args.limit);
 
-                    resolve(result);
+                    result.exec((err, res) => {
+                        if (err) 
+                            reject(err);
+                        else 
+                            resolve(res);
+                        }
+                    );
                 })
             }
         },

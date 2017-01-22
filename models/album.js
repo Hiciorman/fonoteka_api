@@ -1,6 +1,7 @@
 var fs = require('fs');
 var graphql = require('graphql');
 var mongoose = require('mongoose');
+var ObjectID = require('mongodb').ObjectID;
 mongoose.Promise = require('bluebird');
 var track = require('./track');
 var rating = require('./rating');
@@ -22,6 +23,7 @@ var schema = new mongoose.Schema({
     type: Number,
     ref: 'genre'
   }],
+  averageRate: Number,
   tracks: [track.schema],
   ratings: [rating.schema],
   comments: [comment.schema]
@@ -256,8 +258,7 @@ var ratingAdd = {
       if (newRating.rate < 1 || newRating.rate > 10) 
         reject("Rate should be between 1-10");
       else {
-        album
-          .findOneAndUpdate({
+        album.findOneAndUpdate({
             "_id": args.album_id,
             "ratings.user_id": {
               $ne: args.user_id
@@ -266,13 +267,30 @@ var ratingAdd = {
             "$push": {
               "ratings": newRating
             }
-          }, function (err, doc) {
-            if (err) 
-              reject(err);
-            else 
-              resolve(newRating);
-            }
-          )
+          }).exec().then(() => 
+          {
+            album.aggregate([{
+                "$match": {"_id": new ObjectID(args.album_id)}
+              },{
+                "$unwind": "$ratings"
+              },{
+                "$group": { "_id": "$_id", "averageRate": {"$avg": "$ratings.rate"} }
+              }
+            ]).exec((err,res) => {
+                album.findOneAndUpdate({
+                  "_id": res[0]._id
+                }, {
+                  "$set": {
+                    "averageRate": res[0].averageRate
+                  }
+                }).exec();
+
+                if (err) 
+                    reject(err)
+                else 
+                    resolve(newRating)
+            })
+          })
       }
     })
   }
