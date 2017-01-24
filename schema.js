@@ -150,9 +150,9 @@ var query = new graphql.GraphQLObjectType({
                     name: 'released',
                     type: graphql.GraphQLString
                 },
-                genre: {
-                    name: 'genre',
-                    type: graphql.GraphQLString
+                genres:{
+                    name: 'genres',
+                    type: new graphql.GraphQLList(graphql.GraphQLInt)
                 },
                 limit: {
                     name: 'limit',
@@ -169,9 +169,12 @@ var query = new graphql.GraphQLObjectType({
                         .populate('artists')
                         .lean();
 
-                    if (args.released != null) 
-                        result.where({released: args.released});
-                    if (args.genre != null) 
+                    if (args.released != null) {
+                        var start = new Date(args.released, 1, 1);
+                        var end = new Date(args.released, 12, 31);
+                        result.where({released: {$gte: start, $lte: end}});
+                    }
+                    if (args.genres != null) 
                         result.where({"genres": {$in: args.genres}})
 
                     result.limit(args.limit);
