@@ -339,6 +339,7 @@ var query = new graphql.GraphQLObjectType({
 var mutationType = new graphql.GraphQLObjectType({
     name: 'Mutation',
     fields: {
+        userEdit: user.edit,
         friendAdd: user.addFriend,
         friendRequestAdd: friendRequest.add,
         friendRequestUpdate: friendRequest.update,

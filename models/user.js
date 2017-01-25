@@ -10,6 +10,10 @@ var schema = new mongoose.Schema({
         index: true,
         unique: true
     },
+    firstName: String,
+    lastName: String,
+    description: String,
+    birthDate: Date,
     password: String,
     email: {
         type: String,
@@ -47,6 +51,18 @@ var userFields = {
     username: {
         type: graphql.GraphQLString
     },
+    firstName: {
+        type: graphql.GraphQLString
+    },
+    lastName: {
+        type: graphql.GraphQLString
+    },
+    description: {
+        type: graphql.GraphQLString
+    },
+    birthDate: {
+        type: graphql.GraphQLString
+    },
     email: {
         type: graphql.GraphQLString
     },
@@ -57,6 +73,51 @@ var userFields = {
 
 var userType = new graphql.GraphQLObjectType({name: 'User', fields: userFields})
 var userInputType = new graphql.GraphQLInputObjectType({name: '_User', fields: userFields})
+
+var userEdit = {
+  type: userType,
+  description: 'Edit user',
+  args: {
+    _id: {
+      name: '_id',
+      type: new graphql.GraphQLNonNull(graphql.GraphQLID)
+    },
+    firstName: {
+      name: 'firstName',
+      type: graphql.GraphQLString
+    },
+    lastName: {
+      name: 'lastName',
+      type: graphql.GraphQLString
+    },
+    description: {
+      name: 'description',
+      type: graphql.GraphQLString
+    },
+    birthDate: {
+      name: 'birthDate',
+      type: graphql.GraphQLString
+    }
+  },
+  resolve: (root, args) => {
+    return new Promise((resolve, reject) => {
+      user.findOneAndUpdate({
+          "_id": args._id
+        }, {
+          "$set": {
+            "firstName": args.firstName,
+            "lastName": args.lastName,
+            "description": args.description,
+            "birthDate": args.birthDate
+          }
+        }, function (err, doc) {
+          if (err) 
+            reject(err);
+          resolve(args);
+        })
+    })
+  }
+}
 
 var userFriendAdd = {
   type: friendType,
@@ -94,5 +155,6 @@ module.exports = {
     model: user,
     type: userType,
     inputType: userInputType,
+    edit: userEdit,
     addFriend: userFriendAdd
 }
