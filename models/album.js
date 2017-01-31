@@ -315,8 +315,7 @@ var ratingEdit = {
   },
   resolve: (root, args) => {
     return new Promise((resolve, reject) => {
-      album
-        .findOneAndUpdate({
+      album.findOneAndUpdate({
           "_id": args.album_id,
           "ratings.user_id": args.user_id
         }, {
@@ -325,12 +324,31 @@ var ratingEdit = {
           }
         }, {
           runValidators: true
-        }, function (err, result) {
-          if (err) 
-            reject(err);
-          
-          resolve(result);
-        })
+      }).exec().then(()=>
+      { 
+        album.aggregate([{
+                "$match": {"_id": new ObjectID(args.album_id)}
+              },{
+                "$unwind": "$ratings"
+              },{
+                "$group": { "_id": "$_id", "averageRate": {"$avg": "$ratings.rate"} }
+              }
+            ]).exec((err,res) => {
+                album.findOneAndUpdate({
+                  "_id": res[0]._id
+                }, {
+                  "$set": {
+                    "averageRate": res[0].averageRate.toFixed(2)
+                  }
+                }).exec();
+
+                if (err) 
+                    reject(err)
+                else 
+                    resolve(args)
+            })
+      }
+      )
     })
   }
 }
